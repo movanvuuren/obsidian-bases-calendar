@@ -114,6 +114,12 @@ export class CalendarView extends BasesView {
     this.newEntryFolder = (this.config.get("newEntryFolder") as string) || "";
     this.newEntryTemplate = (this.config.get("newEntryTemplate") as string) || "";
 
+    const style = (this.config.get("entryStyle") as string) || "tint";
+    for (const cls of Array.from(this.containerEl.classList)) {
+      if (cls.startsWith("bases-calendar-style-")) this.containerEl.removeClass(cls);
+    }
+    this.containerEl.addClass(`bases-calendar-style-${style}`);
+
     const defaultViewValue = this.config.get("defaultView") as string;
     if (!this.viewChosenByUser) {
       this.currentView = DEFAULT_VIEWS.includes(defaultViewValue)
@@ -397,6 +403,18 @@ export class CalendarView extends BasesView {
               thursday: "Thursday",
               friday: "Friday",
               saturday: "Saturday",
+            },
+          },
+          {
+            displayName: "Entry style",
+            type: "dropdown",
+            key: "entryStyle",
+            default: "tint",
+            options: {
+              tint: "Tint (subtle)",
+              glass: "Glass",
+              gradient: "Gradient",
+              solid: "Solid",
             },
           },
           {

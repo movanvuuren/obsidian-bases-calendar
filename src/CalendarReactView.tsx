@@ -3,6 +3,7 @@ import type {
   EventClickArg,
   EventContentArg,
   EventDropArg,
+  EventMountArg,
   DateSelectArg,
   ViewMountArg,
 } from "@fullcalendar/core";
@@ -493,6 +494,14 @@ export const CalendarReactView: React.FC<CalendarReactViewProps> = ({
     [onCreateEntry],
   );
 
+  // Expose the entry's solid colour (and a readable text colour) to the CSS styles.
+  const handleEventDidMount = useCallback((arg: EventMountArg) => {
+    const color = arg.event.borderColor;
+    if (!color) return;
+    arg.el.style.setProperty("--ev-color", color);
+    arg.el.style.setProperty("--ev-text", readableTextColor(color));
+  }, []);
+
   const handleViewDidMount = useCallback(
     (arg: ViewMountArg) => {
       onViewChange(arg.view.type);
@@ -542,6 +551,7 @@ export const CalendarReactView: React.FC<CalendarReactViewProps> = ({
       eventMouseEnter={handleEventMouseEnter}
       eventDrop={(info) => void handleEventDrop(info)}
       select={handleSelect}
+      eventDidMount={handleEventDidMount}
       viewDidMount={handleViewDidMount}
       height="100%"
       fixedWeekCount={false}
@@ -563,4 +573,15 @@ function tryGetValue(entry: BasesEntry, propId: BasesPropertyId): Value | null {
   } catch {
     return null;
   }
+}
+
+// White text on dark colours, near-black on light ones (perceived luminance).
+function readableTextColor(hex: string): string {
+  const m = /^#([0-9a-f]{6})$/i.exec(hex.trim());
+  if (!m) return "#ffffff";
+  const n = parseInt(m[1], 16);
+  const r = (n >> 16) & 255;
+  const g = (n >> 8) & 255;
+  const b = n & 255;
+  return 0.299 * r + 0.587 * g + 0.114 * b > 160 ? "#1a1a1a" : "#ffffff";
 }

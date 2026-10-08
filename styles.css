@@ -434,3 +434,60 @@ body {
   height: 22px;
   padding-top: 3px;
 }
+
+
+/* ── Entry styles ──────────────────────────────────────────────────────────
+   "tint" is the default (inline colours). The others read --ev-color and
+   --ev-text, which the plugin sets on each entry. */
+
+/* Glass: translucent, blurred, with a light edge and soft shadow */
+.bases-calendar-style-glass .fc-event {
+  background-color: color-mix(in srgb, var(--ev-color, var(--background-secondary)) 24%, transparent) !important;
+  backdrop-filter: blur(10px) saturate(1.5);
+  -webkit-backdrop-filter: blur(10px) saturate(1.5);
+  border: 1px solid color-mix(in srgb, var(--ev-color, var(--background-modifier-border)) 60%, transparent) !important;
+  border-radius: 6px !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+/* Gradient: strong colour fading across the entry */
+.bases-calendar-style-gradient .fc-event {
+  background-image: linear-gradient(
+    135deg,
+    var(--ev-color, var(--background-secondary)),
+    color-mix(in srgb, var(--ev-color, var(--background-secondary)) 40%, transparent)
+  ) !important;
+  background-color: transparent !important;
+  border: none !important;
+  border-radius: 6px !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Solid: flat colour with readable text */
+.bases-calendar-style-solid .fc-event {
+  background-color: var(--ev-color, var(--background-secondary)) !important;
+  border: none !important;
+  border-radius: 6px !important;
+}
+
+.bases-calendar-style-gradient .bases-calendar-event-content,
+.bases-calendar-style-solid .bases-calendar-event-content {
+  color: var(--ev-text, var(--text-normal));
+}
+
+.bases-calendar-style-gradient .bases-calendar-event-content a,
+.bases-calendar-style-solid .bases-calendar-event-content a {
+  color: inherit;
+}
+
+.bases-calendar-style-glass .bases-calendar-event-content {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+.bases-calendar-style-gradient .bases-calendar-event-bookmark,
+.bases-calendar-style-solid .bases-calendar-event-bookmark {
+  background-color: rgba(255, 255, 255, 0.28);
+  color: var(--ev-text, #fff);
+}
