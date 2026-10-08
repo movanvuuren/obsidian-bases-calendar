@@ -1,5 +1,7 @@
 # Bases Calendar
 
+This fork is maintained by [Mo van Vuuren](https://github.com/movanvuuren). It is based on [the original Bases Calendar plugin by mtellin](https://github.com/mtellin/obsidian-bases-calendar).
+
 A calendar view for [Obsidian Bases](https://obsidian.md/bases) that displays your notes on an interactive calendar with multiple time views, Google Calendar–style event colors, and support for timed events.
 
 > [!NOTE]
@@ -36,7 +38,7 @@ This plugin is not listed in the Obsidian community plugin directory. Install it
 
 1. Install the **Obsidian42 - BRAT** plugin from the Obsidian community plugins directory.
 2. Open BRAT settings → **Add Beta plugin**.
-3. Paste `mtellin/obsidian-bases-calendar` and click **Add Plugin**.
+3. Paste `movanvuuren/obsidian-bases-calendar` and click **Add Plugin**.
 4. Enable **Bases Calendar** in **Settings → Community plugins**.
 
 BRAT will notify you when new releases are available.
@@ -174,7 +176,7 @@ The calendar remembers which view you last used within a session and returns to 
 ## Development
 
 ```bash
-git clone https://github.com/mtellin/obsidian-bases-calendar
+git clone https://github.com/movanvuuren/obsidian-bases-calendar
 cd obsidian-bases-calendar
 npm install
 npm run dev     # builds and watches; copies artifacts into test-vault/
