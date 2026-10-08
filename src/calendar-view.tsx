@@ -40,6 +40,7 @@ export class CalendarView extends BasesView {
   private weekStartDay: number = 1;
   private scrollToTime: string = "08:00:00";
   private currentView: string = "workWeek";
+  private viewChosenByUser = false;
   private slotDuration: string = "00:30:00";
 
   constructor(controller: QueryController, scrollEl: HTMLElement) {
@@ -78,7 +79,6 @@ export class CalendarView extends BasesView {
   public setEphemeralState(state: unknown): void {
     if (state && typeof state === "object") {
       const s = state as Record<string, unknown>;
-      if (typeof s.currentView === "string") this.currentView = s.currentView;
       if (typeof s.slotDuration === "string") this.slotDuration = s.slotDuration;
     }
   }
@@ -104,6 +104,13 @@ export class CalendarView extends BasesView {
 
     const scrollTimeValue = this.config.get("scrollToTime") as string;
     this.scrollToTime = scrollTimeValue || "08:00:00";
+
+    const defaultViewValue = this.config.get("defaultView") as string;
+    if (!this.viewChosenByUser) {
+      this.currentView = DEFAULT_VIEWS.includes(defaultViewValue)
+        ? defaultViewValue
+        : "workWeek";
+    }
   }
 
   private updateCalendar(): void {
@@ -166,7 +173,7 @@ export class CalendarView extends BasesView {
             scrollToTime={this.scrollToTime}
             detailProperty={this.detailProp}
             properties={this.config.getOrder() || []}
-            onViewChange={(view) => { this.currentView = view; }}
+            onViewChange={(view) => { this.currentView = view; this.viewChosenByUser = true; }}
             onZoomChange={(dur) => { this.slotDuration = dur; }}
             onEntryClick={(entry, isModEvent) => {
               void this.app.workspace.openLinkText(
@@ -330,6 +337,19 @@ export class CalendarView extends BasesView {
             },
           },
           {
+            displayName: "Default view",
+            type: "dropdown",
+            key: "defaultView",
+            default: "workWeek",
+            options: {
+              dayGridMonth: "Month",
+              timeGridWeek: "Week",
+              workWeek: "Work week",
+              threeDay: "3 day",
+              timeGridDay: "Today",
+            },
+          },
+          {
             displayName: "Day starts at",
             type: "dropdown",
             key: "scrollToTime",
@@ -348,6 +368,8 @@ export class CalendarView extends BasesView {
     ];
   }
 }
+
+const DEFAULT_VIEWS = ["dayGridMonth", "timeGridWeek", "workWeek", "threeDay", "timeGridDay"];
 
 function formatDate(date: Date): string {
   const y = date.getFullYear();
