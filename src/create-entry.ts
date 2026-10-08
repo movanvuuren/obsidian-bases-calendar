@@ -11,16 +11,26 @@ export interface NewEntryOptions {
   templatePath: string;
   startProp: string;
   endProp: string | null;
+  personProp: string;
+  iconProp: string;
   onDone?: () => void;
+}
+
+interface EntryDetails {
+  title: string;
+  person: string;
+  icon: string;
 }
 
 class NewEntryModal extends Modal {
   private title = "";
+  private person = "";
+  private icon = "";
 
   constructor(
     app: App,
     private request: NewEntryRequest,
-    private onSubmit: (title: string) => void,
+    private onSubmit: (details: EntryDetails) => void,
     private onDone?: () => void,
   ) {
     super(app);
@@ -38,7 +48,7 @@ class NewEntryModal extends Modal {
       const title = this.title.trim();
       if (!title) return;
       this.close();
-      this.onSubmit(title);
+      this.onSubmit({ title, person: this.person.trim(), icon: this.icon.trim() });
     };
 
     new Setting(contentEl).setName("Name").addText((text) => {
@@ -51,6 +61,32 @@ class NewEntryModal extends Modal {
       });
       window.setTimeout(() => text.inputEl.focus(), 0);
     });
+
+    new Setting(contentEl)
+      .setName("Who")
+      .setDesc("Optional. Separate several people with commas.")
+      .addText((text) => {
+        text.onChange((v) => (this.person = v));
+        text.inputEl.addEventListener("keydown", (evt) => {
+          if (evt.key === "Enter") {
+            evt.preventDefault();
+            submit();
+          }
+        });
+      });
+
+    new Setting(contentEl)
+      .setName("Icon")
+      .setDesc("Optional. An emoji, or a Lucide icon name such as music.")
+      .addText((text) => {
+        text.onChange((v) => (this.icon = v));
+        text.inputEl.addEventListener("keydown", (evt) => {
+          if (evt.key === "Enter") {
+            evt.preventDefault();
+            submit();
+          }
+        });
+      });
 
     new Setting(contentEl).addButton((btn) =>
       btn.setButtonText("Create").setCta().onClick(submit),
@@ -68,8 +104,8 @@ export function promptNewEntry(
   request: NewEntryRequest,
   options: NewEntryOptions,
 ): void {
-  new NewEntryModal(app, request, (title) => {
-    void createEntry(app, request, options, title);
+  new NewEntryModal(app, request, (details) => {
+    void createEntry(app, request, options, details);
   }, options.onDone).open();
 }
 
@@ -77,8 +113,9 @@ async function createEntry(
   app: App,
   request: NewEntryRequest,
   options: NewEntryOptions,
-  title: string,
+  details: EntryDetails,
 ): Promise<void> {
+  const { title } = details;
   const dateStr = formatDate(request.start);
   const safeTitle = title.replace(/[\\/:*?"<>|#^[\]]/g, "-");
   const folder = options.folder ? normalizePath(options.folder) : "";
@@ -104,6 +141,11 @@ async function createEntry(
     if (options.endProp) {
       fm[options.endProp] = fmt(request.end);
     }
+    if (details.person) {
+      const people = details.person.split(",").map((p) => p.trim()).filter(Boolean);
+      fm[options.personProp] = people.length > 1 ? people : people[0];
+    }
+    if (details.icon) fm[options.iconProp] = details.icon;
   });
   await app.workspace.getLeaf(false).openFile(file);
 }

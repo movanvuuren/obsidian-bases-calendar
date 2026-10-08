@@ -38,6 +38,7 @@ export class CalendarView extends BasesView {
   private endDateProp: BasesPropertyId | null = null;
   private colorProp: BasesPropertyId | null = null;
   private detailProp: BasesPropertyId | null = null;
+  private iconProp: BasesPropertyId | null = null;
   private weekStartDay: number = 1;
   private scrollToTime: string = "08:00:00";
   private currentView: string = "workWeek";
@@ -95,6 +96,8 @@ export class CalendarView extends BasesView {
     this.endDateProp = this.config.getAsPropertyId("endDate");
     this.colorProp = this.config.getAsPropertyId("colorProperty");
     this.detailProp = this.config.getAsPropertyId("detailProperty");
+    this.iconProp =
+      this.config.getAsPropertyId("iconProperty") ?? ("note.icon" as BasesPropertyId);
 
     const weekStartDayValue = this.config.get("weekStartDay") as string;
     const dayNameToNumber: Record<string, number> = {
@@ -178,6 +181,7 @@ export class CalendarView extends BasesView {
             initialSlotDuration={this.slotDuration}
             scrollToTime={this.scrollToTime}
             detailProperty={this.detailProp}
+            iconProperty={this.iconProp}
             properties={this.config.getOrder() || []}
             onViewChange={(view) => { this.currentView = view; this.viewChosenByUser = true; }}
             onZoomChange={(dur) => { this.slotDuration = dur; }}
@@ -212,6 +216,11 @@ export class CalendarView extends BasesView {
     if (!this.startDateProp) return;
     const startProp = this.startDateProp.slice(5);
     const endProp = this.endDateProp ? this.endDateProp.slice(5) : null;
+    const personProp =
+      this.detailProp && this.detailProp.startsWith("note.")
+        ? this.detailProp.slice(5)
+        : "person";
+    const iconProp = this.iconProp?.startsWith("note.") ? this.iconProp.slice(5) : "icon";
     promptNewEntry(
       this.app,
       { start, end, allDay },
@@ -220,6 +229,8 @@ export class CalendarView extends BasesView {
         templatePath: this.newEntryTemplate,
         startProp,
         endProp,
+        personProp,
+        iconProp,
         onDone: () => this.calendarHandleRef.current?.unselect(),
       },
     );
@@ -336,6 +347,12 @@ export class CalendarView extends BasesView {
             type: "property",
             key: "detailProperty",
             placeholder: "Property shown on 2nd line (e.g. people)",
+          },
+          {
+            displayName: "Icon property",
+            type: "property",
+            key: "iconProperty",
+            placeholder: "Emoji or Lucide icon name (default: icon)",
           },
           {
             displayName: "Color property",

@@ -10,7 +10,7 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
-import { BasesEntry, BasesPropertyId, DateValue, Value } from "obsidian";
+import { BasesEntry, BasesPropertyId, DateValue, getIconIds, setIcon, Value } from "obsidian";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { CalendarEntry } from "./calendar-view";
@@ -30,6 +30,7 @@ interface CalendarReactViewProps {
   initialSlotDuration: string;
   scrollToTime: string;
   detailProperty: BasesPropertyId | null;
+  iconProperty: BasesPropertyId | null;
   properties: BasesPropertyId[];
   onViewChange: (view: string) => void;
   onZoomChange: (slotDuration: string) => void;
@@ -53,6 +54,7 @@ export const CalendarReactView: React.FC<CalendarReactViewProps> = ({
   initialSlotDuration,
   scrollToTime,
   detailProperty,
+  iconProperty,
   properties,
   onViewChange,
   onZoomChange,
@@ -247,9 +249,10 @@ export const CalendarReactView: React.FC<CalendarReactViewProps> = ({
   // Uses Obsidian's renderTo for rich DOM output, then counts the actual child nodes
   // (individual chips/links) to decide truncation — more reliable than string splitting
   // since we don't know the exact separator Obsidian uses for multi-select values.
-  const ListPropertyValue: React.FC<{ value: Value; maxItems?: number }> = ({
+  const ListPropertyValue: React.FC<{ value: Value; maxItems?: number; chips?: boolean }> = ({
     value,
     maxItems = 2,
+    chips = false,
   }) => {
     const nodeRef = useCallback(
       (node: HTMLElement | null) => {
@@ -273,6 +276,37 @@ export const CalendarReactView: React.FC<CalendarReactViewProps> = ({
         const temp = document.createElement("span");
         value.renderTo(temp, app.renderContext);
         const children = Array.from(temp.childNodes);
+
+        if (chips) {
+          // One chip per person: split a flat "A, B" text node, otherwise wrap each
+          // rendered child (link/chip), skipping bare separators between them.
+          const items: Node[] = [];
+          if (children.length === 1 && children[0].nodeType === Node.TEXT_NODE) {
+            for (const part of (children[0].textContent ?? "").split(/,\s*/)) {
+              const text = part.trim();
+              if (text) items.push(document.createTextNode(text));
+            }
+          } else {
+            for (const child of children) {
+              if (child.nodeType === Node.TEXT_NODE && !(child.textContent ?? "").replace(/[,\s]/g, "")) continue;
+              items.push(child);
+            }
+          }
+          const shown = items.slice(0, 3);
+          for (const item of shown) {
+            const chip = document.createElement("span");
+            chip.className = "bases-calendar-chip";
+            chip.appendChild(item);
+            node.appendChild(chip);
+          }
+          if (items.length > shown.length) {
+            const badge = document.createElement("span");
+            badge.className = "bases-calendar-prop-overflow";
+            badge.textContent = `+${items.length - shown.length}`;
+            node.appendChild(badge);
+          }
+          return;
+        }
 
         // If Obsidian emitted a single text node, try splitting it by commas to
         // get a meaningful item count (handles "Alice, Bob, Carol" flat strings).
@@ -310,9 +344,31 @@ export const CalendarReactView: React.FC<CalendarReactViewProps> = ({
           node.appendChild(badge);
         }
       },
-      [value],
+      [value, chips],
     );
     return <span className="bases-calendar-prop-list" ref={nodeRef} />;
+  };
+
+  const iconIds = useMemo(() => new Set(getIconIds()), []);
+
+  // Renders an emoji as text, or a Lucide icon when the value is an icon name
+  // (e.g. "music" or "lucide-music").
+  const IconBadge: React.FC<{ icon: string }> = ({ icon }) => {
+    const lucideId = iconIds.has(icon)
+      ? icon
+      : iconIds.has(`lucide-${icon}`)
+        ? `lucide-${icon}`
+        : null;
+    const nodeRef = useCallback(
+      (node: HTMLElement | null) => {
+        if (!node) return;
+        node.empty?.();
+        if (lucideId) setIcon(node, lucideId);
+        else node.textContent = icon;
+      },
+      [lucideId, icon],
+    );
+    return <span className="bases-calendar-event-icon" ref={nodeRef} />;
   };
 
   const renderEventContent = useCallback(
@@ -347,9 +403,9 @@ export const CalendarReactView: React.FC<CalendarReactViewProps> = ({
         const detailValue = tryGetValue(entry, detailProperty);
         if (detailValue && hasNonEmptyValue(detailValue)) {
           detailNode = (
-            <div className="bases-calendar-event-property">
+            <div className="bases-calendar-event-property bases-calendar-person-tag">
               <span className="bases-calendar-event-property-value">
-                <ListPropertyValue value={detailValue} />
+                <ListPropertyValue value={detailValue} chips />
               </span>
             </div>
           );
@@ -371,8 +427,19 @@ export const CalendarReactView: React.FC<CalendarReactViewProps> = ({
         }
       }
 
+      let iconText = "";
+      if (iconProperty) {
+        const iconValue = tryGetValue(entry, iconProperty);
+        if (iconValue && hasNonEmptyValue(iconValue)) iconText = iconValue.toString().trim();
+      }
+
       return (
-        <div className="bases-calendar-event-content">
+        <div className={`bases-calendar-event-content${iconText ? " has-icon" : ""}`}>
+          {iconText && (
+            <span className="bases-calendar-event-bookmark">
+              <IconBadge icon={iconText} />
+            </span>
+          )}
           <div className="bases-calendar-event-title">
             {titleProp
               ? <ListPropertyValue value={titleProp.value} maxItems={1} />
@@ -384,7 +451,7 @@ export const CalendarReactView: React.FC<CalendarReactViewProps> = ({
         </div>
       );
     },
-    [properties, detailProperty, app, hasNonEmptyValue],
+    [properties, detailProperty, iconProperty, app, hasNonEmptyValue, iconIds],
   );
 
   const handleSelect = useCallback(

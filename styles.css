@@ -214,7 +214,9 @@ body {
   /* Event base — no background-color !important so inline Google colors can win */
   .fc-event {
     background-color: var(--background-secondary);
-    border: none !important;
+    /* Solid accent bar on the left, in the entry's colour */
+    border-style: none none none solid !important;
+    border-width: 0 0 0 4px !important;
     border-radius: 3px !important;
     font-weight: 500 !important;
     cursor: pointer !important;
@@ -292,6 +294,7 @@ body {
 }
 
 .bases-calendar-event-content {
+  position: relative;
   padding: 4px 6px;
   font-size: var(--font-ui-smaller);
   color: var(--text-normal);
@@ -356,4 +359,54 @@ body {
   border-radius: 3px;
   padding: 0 3px;
   line-height: 1.4;
+}
+
+
+/* Icon shown as a small bookmark ribbon in the top-right of an entry */
+.bases-calendar-event-content.has-icon .bases-calendar-event-title {
+  padding-right: 28px;
+}
+
+.bases-calendar-event-bookmark {
+  position: absolute;
+  top: 0;
+  right: 4px;
+  width: 24px;
+  height: 30px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 6px;
+  box-sizing: border-box;
+  background-color: rgba(0, 0, 0, 0.35);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 78%, 0 100%);
+  color: #fff;
+  line-height: 1;
+}
+
+.bases-calendar-event-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+}
+
+.bases-calendar-event-icon .svg-icon {
+  width: 15px;
+  height: 15px;
+}
+
+/* People shown as small pills/tags, one per person */
+.bases-calendar-person-tag .bases-calendar-prop-list {
+  gap: 4px;
+}
+
+.bases-calendar-chip {
+  display: inline-block;
+  padding: 0 7px;
+  border-radius: 999px;
+  background-color: rgba(0, 0, 0, 0.28);
+  font-size: 0.9em;
+  line-height: 1.5;
+  white-space: nowrap;
 }

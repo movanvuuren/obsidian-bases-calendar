@@ -38,8 +38,10 @@ export function resolveColor(
   }
 
   if (!solid) return null;
+  const isDark =
+    typeof document !== "undefined" && document.body.classList.contains("theme-dark");
   return {
-    backgroundColor: hexToRgba(solid, 0.18),
+    backgroundColor: hexToRgba(solid, isDark ? 0.4 : 0.18),
     borderColor: solid,
   };
 }
