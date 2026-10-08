@@ -3,6 +3,7 @@ import type {
   EventClickArg,
   EventContentArg,
   EventDropArg,
+  DateSelectArg,
   ViewMountArg,
 } from "@fullcalendar/core";
 import dayGridPlugin from "@fullcalendar/daygrid";
@@ -19,6 +20,7 @@ const ZOOM_LEVELS = ["01:00:00", "00:30:00", "00:15:00"] as const;
 
 export interface CalendarHandle {
   updateSize(): void;
+  unselect(): void;
 }
 
 interface CalendarReactViewProps {
@@ -40,6 +42,7 @@ interface CalendarReactViewProps {
     allDay?: boolean,
   ) => Promise<void>;
   editable: boolean;
+  onCreateEntry?: (start: Date, end: Date, allDay: boolean) => void;
   calendarHandleRef?: React.RefObject<CalendarHandle | null>;
 }
 
@@ -57,6 +60,7 @@ export const CalendarReactView: React.FC<CalendarReactViewProps> = ({
   onEntryContextMenu,
   onEventDrop,
   editable,
+  onCreateEntry,
   calendarHandleRef,
 }) => {
   const app = useApp();
@@ -92,6 +96,7 @@ export const CalendarReactView: React.FC<CalendarReactViewProps> = ({
     if (calendarHandleRef) {
       (calendarHandleRef as React.RefObject<CalendarHandle | null>).current = {
         updateSize: () => calendarRef.current?.getApi().updateSize(),
+        unselect: () => calendarRef.current?.getApi().unselect(),
       };
     }
     return () => {
@@ -382,6 +387,43 @@ export const CalendarReactView: React.FC<CalendarReactViewProps> = ({
     [properties, detailProperty, app, hasNonEmptyValue],
   );
 
+  const handleSelect = useCallback(
+    (sel: DateSelectArg) => {
+      if (!onCreateEntry) return;
+      let end = sel.end;
+      if (sel.allDay) {
+        // FullCalendar's all-day end is exclusive; make it inclusive.
+        end = new Date(sel.end);
+        end.setDate(end.getDate() - 1);
+      }
+      onCreateEntry(sel.start, end, sel.allDay);
+    },
+    [onCreateEntry],
+  );
+
+  const lastClickRef = useRef<{ time: number; at: number } | null>(null);
+
+  // A double-click on a slot creates a one-hour entry (or a one-day entry in
+  // month view). FullCalendar has no double-click callback, so detect it here.
+  const handleDateClick = useCallback(
+    (click: { date: Date; allDay: boolean }) => {
+      if (!onCreateEntry) return;
+      const now = Date.now();
+      const last = lastClickRef.current;
+      const key = click.date.getTime();
+      if (last && last.time === key && now - last.at < 400) {
+        lastClickRef.current = null;
+        const end = click.allDay
+          ? new Date(click.date)
+          : new Date(click.date.getTime() + 60 * 60 * 1000);
+        onCreateEntry(click.date, end, click.allDay);
+      } else {
+        lastClickRef.current = { time: key, at: now };
+      }
+    },
+    [onCreateEntry],
+  );
+
   const handleViewDidMount = useCallback(
     (arg: ViewMountArg) => {
       onViewChange(arg.view.type);
@@ -430,11 +472,17 @@ export const CalendarReactView: React.FC<CalendarReactViewProps> = ({
       eventClick={handleEventClick}
       eventMouseEnter={handleEventMouseEnter}
       eventDrop={(info) => void handleEventDrop(info)}
+      select={handleSelect}
       viewDidMount={handleViewDidMount}
       height="100%"
       fixedWeekCount={false}
       fixedMirrorParent={document.body ?? undefined}
       eventDurationEditable={false}
+      selectable={Boolean(onCreateEntry)}
+      selectMirror={false}
+      unselectAuto={false}
+      selectMinDistance={6}
+      dateClick={handleDateClick}
       editable={editable}
     />
   );

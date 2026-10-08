@@ -13,6 +13,7 @@ import { createRoot, Root } from "react-dom/client";
 import { CalendarHandle, CalendarReactView } from "./CalendarReactView";
 import { AppContext } from "./context";
 import { resolveColor } from "./colors";
+import { promptNewEntry } from "./create-entry";
 
 export const CalendarViewType = "calendar";
 
@@ -42,6 +43,8 @@ export class CalendarView extends BasesView {
   private currentView: string = "workWeek";
   private viewChosenByUser = false;
   private slotDuration: string = "00:30:00";
+  private newEntryFolder = "";
+  private newEntryTemplate = "";
 
   constructor(controller: QueryController, scrollEl: HTMLElement) {
     super(controller);
@@ -104,6 +107,9 @@ export class CalendarView extends BasesView {
 
     const scrollTimeValue = this.config.get("scrollToTime") as string;
     this.scrollToTime = scrollTimeValue || "08:00:00";
+
+    this.newEntryFolder = (this.config.get("newEntryFolder") as string) || "";
+    this.newEntryTemplate = (this.config.get("newEntryTemplate") as string) || "";
 
     const defaultViewValue = this.config.get("defaultView") as string;
     if (!this.viewChosenByUser) {
@@ -190,10 +196,32 @@ export class CalendarView extends BasesView {
               this.updateEntryDates(entry, newStart, newEnd, allDay)
             }
             editable={this.isEditable()}
+            onCreateEntry={
+              this.isEditable()
+                ? (start, end, allDay) => this.createEntry(start, end, allDay)
+                : undefined
+            }
             calendarHandleRef={this.calendarHandleRef}
           />
         </AppContext.Provider>
       </StrictMode>,
+    );
+  }
+
+  private createEntry(start: Date, end: Date, allDay: boolean): void {
+    if (!this.startDateProp) return;
+    const startProp = this.startDateProp.slice(5);
+    const endProp = this.endDateProp ? this.endDateProp.slice(5) : null;
+    promptNewEntry(
+      this.app,
+      { start, end, allDay },
+      {
+        folder: this.newEntryFolder,
+        templatePath: this.newEntryTemplate,
+        startProp,
+        endProp,
+        onDone: () => this.calendarHandleRef.current?.unselect(),
+      },
     );
   }
 
@@ -314,6 +342,24 @@ export class CalendarView extends BasesView {
             type: "property",
             key: "colorProperty",
             placeholder: "Property (e.g. tomato, sage, peacock…)",
+          },
+        ],
+      },
+      {
+        displayName: "New entries",
+        type: "group",
+        items: [
+          {
+            displayName: "Folder",
+            type: "folder",
+            key: "newEntryFolder",
+            placeholder: "Where new notes are created",
+          },
+          {
+            displayName: "Template note (optional)",
+            type: "file",
+            key: "newEntryTemplate",
+            placeholder: "Note whose content is copied into new entries",
           },
         ],
       },
