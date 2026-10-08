@@ -379,11 +379,11 @@ export const CalendarReactView: React.FC<CalendarReactViewProps> = ({
 
       // Skip detail row for short timed events (≤20 min) to avoid overflow.
       const { start, end, allDay } = eventInfo.event;
-      const isShortTimed =
-        !allDay &&
-        start !== null &&
-        end !== null &&
-        end.getTime() - start.getTime() <= 20 * 60 * 1000;
+      const durationMs =
+        !allDay && start !== null && end !== null ? end.getTime() - start.getTime() : null;
+      const isShortTimed = durationMs !== null && durationMs <= 20 * 60 * 1000;
+      // Up to 30 minutes there is only room for one line, so put people beside the title.
+      const isCompact = durationMs !== null && durationMs <= 30 * 60 * 1000;
 
       // Title: first valid property from order (or file basename fallback).
       const validProperties: { propertyId: BasesPropertyId; value: Value }[] = [];
@@ -434,7 +434,9 @@ export const CalendarReactView: React.FC<CalendarReactViewProps> = ({
       }
 
       return (
-        <div className={`bases-calendar-event-content${iconText ? " has-icon" : ""}`}>
+        <div
+          className={`bases-calendar-event-content${iconText ? " has-icon" : ""}${isCompact ? " is-compact" : ""}`}
+        >
           {iconText && (
             <span className="bases-calendar-event-bookmark">
               <IconBadge icon={iconText} />

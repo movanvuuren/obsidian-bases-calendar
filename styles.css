@@ -410,3 +410,27 @@ body {
   line-height: 1.5;
   white-space: nowrap;
 }
+
+/* Short entries: title and people share one line so nothing is clipped */
+.bases-calendar-event-content.is-compact {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+
+.bases-calendar-event-content.is-compact .bases-calendar-event-title {
+  flex: 0 1 auto;
+  margin-bottom: 0;
+}
+
+.bases-calendar-event-content.is-compact .bases-calendar-event-properties {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.bases-calendar-event-content.is-compact .bases-calendar-event-bookmark {
+  height: 22px;
+  padding-top: 3px;
+}
