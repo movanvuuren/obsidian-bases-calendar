@@ -294,7 +294,6 @@ body {
 }
 
 .bases-calendar-event-content {
-  position: relative;
   padding: 4px 6px;
   font-size: var(--font-ui-smaller);
   color: var(--text-normal);
@@ -507,4 +506,10 @@ body {
 .bases-calendar-style-solid .bases-calendar-event-bookmark {
   background-color: rgba(255, 255, 255, 0.28);
   color: var(--ev-text, #fff);
+}
+
+/* Anchor the bookmark to the entry itself, not its content. In the month view
+   the content shrinks to its text, which pulled the bookmark towards the middle. */
+.bases-calendar-container .fc-daygrid-event {
+  position: relative;
 }
