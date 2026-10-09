@@ -585,3 +585,103 @@ body {
   color: var(--text-normal);
   line-height: 1.4;
 }
+
+/* ── Narrow screens (phones, narrow panes) ─────────────────────────────────
+   The container gets .is-narrow below 640px wide. */
+.bases-calendar-container.is-narrow .fc-toolbar.fc-header-toolbar {
+  margin-bottom: 0.5em;
+}
+
+/* Narrow: the view buttons sit in a full-width row under the title and arrows, so
+   they stay visible at the top instead of being pushed off the bottom. */
+.bases-calendar-container.is-narrow .fc-toolbar.fc-header-toolbar {
+  flex-wrap: wrap;
+  row-gap: 0.4em;
+}
+
+.bases-calendar-container.is-narrow .fc-header-toolbar .fc-toolbar-chunk:nth-child(2) {
+  order: 3;
+  flex: 0 0 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.bases-calendar-container.is-narrow .fc-toolbar-title {
+  font-size: 1.1em;
+}
+
+.bases-calendar-container.is-narrow .fc-button {
+  padding: 0.3em 0.55em;
+  font-size: 0.85em;
+}
+
+.bases-calendar-container.is-narrow .bases-calendar-event-content {
+  padding: 2px 4px;
+  font-size: 11px;
+}
+
+/* The icon moves from a corner ribbon to a small inline icon before the title,
+   so it can no longer cover the text. */
+.bases-calendar-container.is-narrow .bases-calendar-event-content.has-icon {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 4px;
+}
+
+.bases-calendar-container.is-narrow .bases-calendar-event-bookmark {
+  position: static;
+  order: -1;
+  width: auto;
+  height: auto;
+  padding: 0;
+  background: none;
+  clip-path: none;
+  color: inherit;
+}
+
+.bases-calendar-container.is-narrow .bases-calendar-event-icon {
+  font-size: 12px;
+}
+
+.bases-calendar-container.is-narrow .bases-calendar-event-icon .svg-icon {
+  width: 12px;
+  height: 12px;
+}
+
+.bases-calendar-container.is-narrow .bases-calendar-event-content.has-icon .bases-calendar-event-title {
+  flex: 1 1 0;
+  min-width: 0;
+  padding-right: 0;
+  margin-bottom: 0;
+}
+
+.bases-calendar-container.is-narrow .bases-calendar-event-content.has-icon .bases-calendar-event-properties {
+  flex: 0 0 100%;
+}
+
+/* Month view: one line per entry. People are hidden; there is no room for them. */
+.bases-calendar-container.is-narrow .fc-daygrid-event .bases-calendar-event-properties {
+  display: none;
+}
+
+.bases-calendar-container.is-narrow .bases-calendar-chip {
+  padding: 0 5px;
+  font-size: 0.85em;
+}
+
+/* The week views would squeeze five or seven days into a phone width, so they keep
+   a minimum width and scroll sideways instead. */
+.bases-calendar-container.is-narrow .fc-view-harness {
+  overflow-x: auto;
+}
+
+.bases-calendar-container.is-narrow .fc-view-harness-active > .fc-timeGridWeek-view {
+  min-width: 700px;
+  right: auto;
+}
+
+.bases-calendar-container.is-narrow .fc-view-harness-active > .fc-workWeek-view {
+  min-width: 520px;
+  right: auto;
+}

@@ -17,6 +17,9 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { CalendarEntry } from "./calendar-view";
 import { useApp } from "./hooks";
 
+// Below this width the calendar switches to a compact layout (phones, narrow panes).
+const NARROW_WIDTH = 640;
+
 const ZOOM_LEVELS = ["01:00:00", "00:30:00", "00:15:00"] as const;
 
 export interface CalendarHandle {
@@ -72,6 +75,8 @@ export const CalendarReactView: React.FC<CalendarReactViewProps> = ({
 }) => {
   const app = useApp();
   const calendarRef = useRef<FullCalendar>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const [narrow, setNarrow] = useState(false);
   const [slotDuration, setSlotDuration] = useState(initialSlotDuration);
   const slotDurationRef = useRef(initialSlotDuration);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -98,6 +103,25 @@ export const CalendarReactView: React.FC<CalendarReactViewProps> = ({
     }),
     [handleZoom],
   );
+
+  // Track the available width and mark the container, so styles can respond to it.
+  useEffect(() => {
+    const el = wrapperRef.current;
+    if (!el) return;
+    const host = el.closest<HTMLElement>(".bases-calendar-container") ?? el;
+    const update = () => {
+      const isNarrow = host.clientWidth > 0 && host.clientWidth < NARROW_WIDTH;
+      host.classList.toggle("is-narrow", isNarrow);
+      setNarrow(isNarrow);
+    };
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(host);
+    return () => {
+      observer.disconnect();
+      host.classList.remove("is-narrow");
+    };
+  }, []);
 
   useEffect(() => {
     if (calendarHandleRef) {
@@ -540,6 +564,7 @@ export const CalendarReactView: React.FC<CalendarReactViewProps> = ({
   );
 
   return (
+    <div ref={wrapperRef} style={{ height: "100%" }}>
     <FullCalendar
       ref={calendarRef}
       plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
@@ -562,17 +587,26 @@ export const CalendarReactView: React.FC<CalendarReactViewProps> = ({
         timeGridDay: { buttonText: "Day" },
       }}
       firstDay={weekStartDay}
-      headerToolbar={{
-        left: "title",
-        center: "",
-        right: "dayGridMonth,timeGridWeek,workWeek,threeDay,timeGridDay prev,today,next zoomOut,zoomIn",
-      }}
+      headerToolbar={
+        narrow
+          ? {
+              left: "title",
+              center: "dayGridMonth,timeGridWeek,workWeek,threeDay,timeGridDay",
+              right: "prev,today,next",
+            }
+          : {
+              left: "title",
+              center: "",
+              right: "dayGridMonth,timeGridWeek,workWeek,threeDay,timeGridDay prev,today,next zoomOut,zoomIn",
+            }
+      }
       customButtons={customButtons}
       buttonText={{ today: "Today", month: "Month", week: "Week", day: "Day" }}
       nowIndicator={true}
       scrollTime={scrollToTime}
       slotDuration={slotDuration}
-      slotEventOverlap={false}
+      // Side by side on wide screens; stacked on narrow ones, where columns get too thin.
+      slotEventOverlap={narrow}
       eventMinHeight={20}
       navLinks={false}
       events={events}
@@ -594,6 +628,7 @@ export const CalendarReactView: React.FC<CalendarReactViewProps> = ({
       dateClick={handleDateClick}
       editable={editable}
     />
+    </div>
   );
 };
 
