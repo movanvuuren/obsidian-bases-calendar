@@ -1,4 +1,5 @@
 ﻿import { App, Modal, Setting, TFile, normalizePath } from "obsidian";
+import { GOOGLE_CALENDAR_COLORS } from "./colors";
 
 export interface NewEntryRequest {
   start: Date;
@@ -14,6 +15,7 @@ export interface NewEntryOptions {
   personProp: string;
   iconProp: string;
   involvementProp: string;
+  colorProp: string;
   onDone?: () => void;
 }
 
@@ -22,6 +24,7 @@ interface EntryDetails {
   person: string;
   icon: string;
   involvement: "attending" | "following";
+  color: string;
 }
 
 class NewEntryModal extends Modal {
@@ -29,14 +32,17 @@ class NewEntryModal extends Modal {
   private person = "";
   private icon = "";
   private involvement: "attending" | "following" = "attending";
+  private color = "";
 
   constructor(
     app: App,
     private request: NewEntryRequest,
     private onSubmit: (details: EntryDetails) => void,
     private onDone?: () => void,
+    initialColor = "",
   ) {
     super(app);
+    this.color = initialColor;
   }
 
   onOpen(): void {
@@ -56,6 +62,7 @@ class NewEntryModal extends Modal {
         person: this.person.trim(),
         icon: this.icon.trim(),
         involvement: this.involvement,
+        color: this.color,
       });
     };
 
@@ -107,6 +114,24 @@ class NewEntryModal extends Modal {
           .onChange((v) => (this.involvement = v as "attending" | "following")),
       );
 
+    const colorSetting = new Setting(contentEl).setName("Colour");
+    const swatches = colorSetting.controlEl.createDiv({ cls: "bases-calendar-swatches" });
+    const buttons = new Map<string, HTMLButtonElement>();
+    const select = (name: string) => {
+      this.color = this.color === name ? "" : name;
+      buttons.forEach((btn, key) => btn.toggleClass("is-selected", key === this.color));
+    };
+    for (const [name, hex] of Object.entries(GOOGLE_CALENDAR_COLORS)) {
+      const btn = swatches.createEl("button", {
+        cls: "bases-calendar-swatch",
+        attr: { type: "button", "aria-label": name, title: name },
+      });
+      btn.style.backgroundColor = hex;
+      btn.toggleClass("is-selected", name === this.color);
+      btn.addEventListener("click", () => select(name));
+      buttons.set(name, btn);
+    }
+
     new Setting(contentEl).addButton((btn) =>
       btn.setButtonText("Create").setCta().onClick(submit),
     );
@@ -123,9 +148,25 @@ export function promptNewEntry(
   request: NewEntryRequest,
   options: NewEntryOptions,
 ): void {
-  new NewEntryModal(app, request, (details) => {
-    void createEntry(app, request, options, details);
-  }, options.onDone).open();
+  new NewEntryModal(
+    app,
+    request,
+    (details) => {
+      void createEntry(app, request, options, details);
+    },
+    options.onDone,
+    templateColor(app, options),
+  ).open();
+}
+
+// The colour already set in the template, so the picker starts on it.
+function templateColor(app: App, options: NewEntryOptions): string {
+  if (!options.templatePath) return "";
+  const template = app.vault.getAbstractFileByPath(options.templatePath);
+  if (!(template instanceof TFile)) return "";
+  const value = app.metadataCache.getFileCache(template)?.frontmatter?.[options.colorProp];
+  const name = typeof value === "string" ? value.trim().toLowerCase() : "";
+  return name in GOOGLE_CALENDAR_COLORS ? name : "";
 }
 
 async function createEntry(
@@ -166,6 +207,7 @@ async function createEntry(
     }
     if (details.icon) fm[options.iconProp] = details.icon;
     fm[options.involvementProp] = details.involvement;
+    if (details.color) fm[options.colorProp] = details.color;
   });
   await app.workspace.getLeaf(false).openFile(file);
 }

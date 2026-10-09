@@ -10,7 +10,7 @@ A calendar view for [Obsidian Bases](https://obsidian.md/bases) that displays yo
 > maintain it. If you run into a problem, open an issue and I'll try to address
 > it.
 
-![Bases Calendar showing a work-week view with colored events](docs/preview.png)
+![Bases Calendar showing a 3-day view with colored events](docs/preview.png)
 
 > **Requires Obsidian 1.10 or later** (the version that introduced Bases).
 
@@ -32,6 +32,8 @@ A calendar view for [Obsidian Bases](https://obsidian.md/bases) that displays yo
 - **Attending / following** — entries you only need to know about are shown with a lighter fill and an eye icon
 - **Page Preview on hover** — hover over an event to preview the note without opening it
 
+![Bases Calendar showing a 3-day view in dark mode and gadient view](docs/dark_gradient.png)
+![Bases Calendar showing how to create an event from the calendar](docs/entry.png)
 ---
 
 ## Installation
@@ -202,6 +204,7 @@ A dialog opens showing the date and time range and asks for:
 | **Who** *(optional)* | The detail property, or `person` if the detail property is not a note property. Several people can be separated by commas. |
 | **Icon** *(optional)* | The icon property, or `icon`. |
 | **Involvement** | The involvement property, or `involvement`. Attending or Following. |
+| **Colour** | The color property, or `color`. A row of Google Calendar colour swatches; click one to choose it, and click it again to clear. The picker starts on the template's colour, if it has one. |
 
 The note is created in the configured **Folder**, with the content of the **Template note** if one is set, then has its start and end properties written (a date for all-day entries, a date and time otherwise) and is opened. The range stays highlighted while the dialog is open and clears when it closes.
 

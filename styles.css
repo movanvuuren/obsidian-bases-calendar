@@ -541,3 +541,30 @@ body {
   width: 12px;
   height: 12px;
 }
+
+/* Colour swatches in the new-entry dialog */
+.bases-calendar-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.bases-calendar-swatch {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+}
+
+.bases-calendar-swatch:hover {
+  transform: scale(1.12);
+}
+
+.bases-calendar-swatch.is-selected {
+  border-color: var(--text-normal);
+  box-shadow: 0 0 0 2px var(--background-primary), inset 0 0 0 1px rgba(0, 0, 0, 0.25);
+}

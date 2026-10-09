@@ -232,6 +232,7 @@ export class CalendarView extends BasesView {
         ? this.detailProp.slice(5)
         : "person";
     const iconProp = this.iconProp?.startsWith("note.") ? this.iconProp.slice(5) : "icon";
+    const colorProp = this.colorProp?.startsWith("note.") ? this.colorProp.slice(5) : "color";
     const involvementProp = this.involvementProp?.startsWith("note.")
       ? this.involvementProp.slice(5)
       : "involvement";
@@ -246,6 +247,7 @@ export class CalendarView extends BasesView {
         personProp,
         iconProp,
         involvementProp,
+        colorProp,
         onDone: () => this.calendarHandleRef.current?.unselect(),
       },
     );
