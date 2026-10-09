@@ -16,6 +16,7 @@ export interface NewEntryOptions {
   iconProp: string;
   involvementProp: string;
   colorProp: string;
+  titleProp: string;
   flagProp: string | null;
   onDone?: () => void;
 }
@@ -67,7 +68,7 @@ class NewEntryModal extends Modal {
       });
     };
 
-    new Setting(contentEl).setName("Name").addText((text) => {
+    new Setting(contentEl).setName("Title").setDesc("Shown on the calendar. The note is named after it.").addText((text) => {
       text.setPlaceholder("Activity name").onChange((v) => (this.title = v));
       text.inputEl.addEventListener("keydown", (evt) => {
         if (evt.key === "Enter") {
@@ -208,6 +209,7 @@ async function createEntry(
     }
     if (details.icon) fm[options.iconProp] = details.icon;
     fm[options.involvementProp] = details.involvement;
+    fm[options.titleProp] = title;
     if (details.color) fm[options.colorProp] = details.color;
     if (options.flagProp) fm[options.flagProp] = true;
   });

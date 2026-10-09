@@ -114,6 +114,7 @@ All options are configured through the **Properties** panel (gear icon) of a cal
 | Option | Key | Description |
 |--------|-----|-------------|
 | **Detail property** | `detailProperty` | A frontmatter property shown on the second line of each event. Supports multi-select/list values — shows up to 2 items and a `+N` badge for the rest. If left blank, falls back to the first non-title property in your view's column order. |
+| **Title property** | `titleProperty` | A frontmatter property holding the event title shown on the calendar. Defaults to `title`. When a note has none, the file name is shown with any trailing `_YYYY-MM-DD` removed and underscores replaced by spaces. |
 | **Icon property** | `iconProperty` | A frontmatter property holding an emoji (`🏏`) or a Lucide icon name (`music` or `lucide-music`). Shown as a bookmark in the top-right of the entry. Defaults to `icon` when not set. |
 | **Involvement property** | `involvementProperty` | A frontmatter property whose value is `attending` or `following`. `following` entries are drawn with a lighter fill, a dashed border and a small eye icon. An empty value counts as attending. Defaults to `involvement` when not set. |
 | **Color property** | `colorProperty` | A frontmatter property whose value sets the event color. Accepts a Google Calendar color name (see table below) or a `#RRGGBB` hex value. Events with no color value use the default theme style. |
@@ -201,7 +202,7 @@ A dialog opens showing the date and time range and asks for:
 
 | Field | Saved to |
 |-------|----------|
-| **Name** | The note's filename, `Name_YYYY-MM-DD.md`. A `_2` suffix is added if that name is taken. |
+| **Title** | The title property (or `title`) and, with the date added, the note's filename: `Title_YYYY-MM-DD.md`. A `_2` suffix is added if that name is taken. |
 | **Who** *(optional)* | The detail property, or `person` if the detail property is not a note property. Several people can be separated by commas. |
 | **Icon** *(optional)* | The icon property, or `icon`. |
 | **Involvement** | The involvement property, or `involvement`. Attending or Following. |

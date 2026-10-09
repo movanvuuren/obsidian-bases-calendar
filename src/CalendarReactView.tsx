@@ -32,6 +32,7 @@ interface CalendarReactViewProps {
   scrollToTime: string;
   detailProperty: BasesPropertyId | null;
   iconProperty: BasesPropertyId | null;
+  titleProperty: BasesPropertyId | null;
   involvementProperty: BasesPropertyId | null;
   properties: BasesPropertyId[];
   onViewChange: (view: string) => void;
@@ -57,6 +58,7 @@ export const CalendarReactView: React.FC<CalendarReactViewProps> = ({
   scrollToTime,
   detailProperty,
   iconProperty,
+  titleProperty,
   involvementProperty,
   properties,
   onViewChange,
@@ -445,6 +447,16 @@ export const CalendarReactView: React.FC<CalendarReactViewProps> = ({
         }
       }
 
+      // Event title: the title property if the note has one, otherwise the file
+      // name with any trailing date removed and underscores shown as spaces.
+      let titleText = "";
+      if (titleProperty) {
+        const tv = tryGetValue(entry, titleProperty);
+        if (tv && hasNonEmptyValue(tv)) titleText = tv.toString().trim();
+      }
+      const titleIsFileName = !titleProp || titleProp.propertyId.startsWith("file.");
+      if (!titleText && titleIsFileName) titleText = cleanFileName(entry.file.basename);
+
       let iconText = "";
       if (iconProperty) {
         const iconValue = tryGetValue(entry, iconProperty);
@@ -462,9 +474,9 @@ export const CalendarReactView: React.FC<CalendarReactViewProps> = ({
           )}
           <div className="bases-calendar-event-title">
             {eventInfo.event.extendedProps.following && <FollowIcon />}
-            {titleProp
-              ? <ListPropertyValue value={titleProp.value} maxItems={1} />
-              : entry.file.basename}
+            {titleText
+              ? titleText
+              : titleProp && <ListPropertyValue value={titleProp.value} maxItems={1} />}
           </div>
           {detailNode && (
             <div className="bases-calendar-event-properties">{detailNode}</div>
@@ -472,7 +484,7 @@ export const CalendarReactView: React.FC<CalendarReactViewProps> = ({
         </div>
       );
     },
-    [properties, detailProperty, iconProperty, app, hasNonEmptyValue, iconIds],
+    [properties, detailProperty, iconProperty, titleProperty, app, hasNonEmptyValue, iconIds],
   );
 
   const handleSelect = useCallback(
@@ -602,4 +614,13 @@ function readableTextColor(hex: string): string {
   const g = (n >> 8) & 255;
   const b = n & 255;
   return 0.299 * r + 0.587 * g + 0.114 * b > 160 ? "#1a1a1a" : "#ffffff";
+}
+
+// "Kiara_Netball_Match_2026-10-17" -> "Kiara Netball Match"
+function cleanFileName(name: string): string {
+  const cleaned = name
+    .replace(/[\s_-]*\d{4}-\d{2}-\d{2}(?:_\d+)?$/, "")
+    .replace(/_+/g, " ")
+    .trim();
+  return cleaned || name;
 }

@@ -39,6 +39,7 @@ export class CalendarView extends BasesView {
   private colorProp: BasesPropertyId | null = null;
   private detailProp: BasesPropertyId | null = null;
   private iconProp: BasesPropertyId | null = null;
+  private titleProp: BasesPropertyId | null = null;
   private involvementProp: BasesPropertyId | null = null;
   private weekStartDay: number = 1;
   private scrollToTime: string = "08:00:00";
@@ -101,6 +102,8 @@ export class CalendarView extends BasesView {
     this.involvementProp =
       this.config.getAsPropertyId("involvementProperty") ??
       ("note.involvement" as BasesPropertyId);
+    this.titleProp =
+      this.config.getAsPropertyId("titleProperty") ?? ("note.title" as BasesPropertyId);
     this.iconProp =
       this.config.getAsPropertyId("iconProperty") ?? ("note.icon" as BasesPropertyId);
 
@@ -195,6 +198,7 @@ export class CalendarView extends BasesView {
             scrollToTime={this.scrollToTime}
             detailProperty={this.detailProp}
             iconProperty={this.iconProp}
+            titleProperty={this.titleProp}
             involvementProperty={this.involvementProp}
             properties={this.config.getOrder() || []}
             onViewChange={(view) => { this.currentView = view; this.viewChosenByUser = true; }}
@@ -235,6 +239,7 @@ export class CalendarView extends BasesView {
         ? this.detailProp.slice(5)
         : "person";
     const iconProp = this.iconProp?.startsWith("note.") ? this.iconProp.slice(5) : "icon";
+    const titleProp = this.titleProp?.startsWith("note.") ? this.titleProp.slice(5) : "title";
     const colorProp = this.colorProp?.startsWith("note.") ? this.colorProp.slice(5) : "color";
     const involvementProp = this.involvementProp?.startsWith("note.")
       ? this.involvementProp.slice(5)
@@ -251,6 +256,7 @@ export class CalendarView extends BasesView {
         iconProp,
         involvementProp,
         colorProp,
+        titleProp,
         flagProp: this.newEntryFlag,
         onDone: () => this.calendarHandleRef.current?.unselect(),
       },
@@ -368,6 +374,12 @@ export class CalendarView extends BasesView {
             type: "property",
             key: "detailProperty",
             placeholder: "Property shown on 2nd line (e.g. people)",
+          },
+          {
+            displayName: "Title property",
+            type: "property",
+            key: "titleProperty",
+            placeholder: "Event title (default: title)",
           },
           {
             displayName: "Icon property",

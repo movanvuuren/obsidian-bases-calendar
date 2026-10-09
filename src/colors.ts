@@ -12,6 +12,16 @@ export const GOOGLE_CALENDAR_COLORS: Record<string, string> = {
   tomato: "#D50000",
 };
 
+// Mix a colour towards white. Used in dark mode, where the saturated palette
+// reads as muddy against a dark background.
+function lighten(hex: string, amount: number): string {
+  const mix = (v: number) => Math.round(v + (255 - v) * amount);
+  const r = mix(parseInt(hex.slice(1, 3), 16));
+  const g = mix(parseInt(hex.slice(3, 5), 16));
+  const b = mix(parseInt(hex.slice(5, 7), 16));
+  return "#" + [r, g, b].map((v) => v.toString(16).padStart(2, "0")).join("").toUpperCase();
+}
+
 function hexToRgba(hex: string, alpha: number): string {
   const r = parseInt(hex.slice(1, 3), 16);
   const g = parseInt(hex.slice(3, 5), 16);
@@ -40,6 +50,7 @@ export function resolveColor(
   if (!solid) return null;
   const isDark =
     typeof document !== "undefined" && document.body.classList.contains("theme-dark");
+  if (isDark) solid = lighten(solid, 0.3);
   return {
     backgroundColor: hexToRgba(solid, isDark ? 0.4 : 0.18),
     borderColor: solid,
