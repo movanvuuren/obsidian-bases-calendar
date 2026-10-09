@@ -125,6 +125,7 @@ Used when you create an entry by dragging or double-clicking on the calendar. Se
 | Option | Key | Description |
 |--------|-----|-------------|
 | **Folder** | `newEntryFolder` | Where new notes are created. The folder is created if it does not exist. Leave blank for the vault root. |
+| **Flag property** *(optional)* | `newEntryFlag` | A note property that is set to `true` on every new entry, such as `calendar`. Use it when your base filters on a checkbox property, so entries created from the calendar actually appear on it. |
 | **Template note** *(optional)* | `newEntryTemplate` | A note whose content, including frontmatter, is copied into each new entry. Copied as plain text, so template-plugin syntax is not run. |
 
 ### Calendar options
@@ -210,7 +211,7 @@ The note is created in the configured **Folder**, with the content of the **Temp
 
 A single click does nothing, so dragging to select works normally. Two clicks on the same slot within 400 ms count as a double-click.
 
-For entries to appear on the calendar after they are created, the template should carry any property your base filters on, for example `calendar: true`.
+For entries to appear on the calendar after they are created, they must satisfy your base's filters. Either put the property your base filters on in the template, or set the **Flag property** option (for example `calendar`), which writes `true` to it on every new entry.
 
 ---
 

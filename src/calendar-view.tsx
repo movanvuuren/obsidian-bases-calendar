@@ -47,6 +47,7 @@ export class CalendarView extends BasesView {
   private slotDuration: string = "00:30:00";
   private newEntryFolder = "";
   private newEntryTemplate = "";
+  private newEntryFlag: string | null = null;
 
   constructor(controller: QueryController, scrollEl: HTMLElement) {
     super(controller);
@@ -117,6 +118,8 @@ export class CalendarView extends BasesView {
 
     this.newEntryFolder = (this.config.get("newEntryFolder") as string) || "";
     this.newEntryTemplate = (this.config.get("newEntryTemplate") as string) || "";
+    const flagProp = this.config.getAsPropertyId("newEntryFlag");
+    this.newEntryFlag = flagProp?.startsWith("note.") ? flagProp.slice(5) : null;
 
     const style = (this.config.get("entryStyle") as string) || "tint";
     for (const cls of Array.from(this.containerEl.classList)) {
@@ -248,6 +251,7 @@ export class CalendarView extends BasesView {
         iconProp,
         involvementProp,
         colorProp,
+        flagProp: this.newEntryFlag,
         onDone: () => this.calendarHandleRef.current?.unselect(),
       },
     );
@@ -394,6 +398,12 @@ export class CalendarView extends BasesView {
             type: "folder",
             key: "newEntryFolder",
             placeholder: "Where new notes are created",
+          },
+          {
+            displayName: "Flag property (optional)",
+            type: "property",
+            key: "newEntryFlag",
+            placeholder: "Set to true on new entries, e.g. calendar",
           },
           {
             displayName: "Template note (optional)",

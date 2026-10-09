@@ -16,6 +16,7 @@ export interface NewEntryOptions {
   iconProp: string;
   involvementProp: string;
   colorProp: string;
+  flagProp: string | null;
   onDone?: () => void;
 }
 
@@ -208,6 +209,7 @@ async function createEntry(
     if (details.icon) fm[options.iconProp] = details.icon;
     fm[options.involvementProp] = details.involvement;
     if (details.color) fm[options.colorProp] = details.color;
+    if (options.flagProp) fm[options.flagProp] = true;
   });
   await app.workspace.getLeaf(false).openFile(file);
 }
