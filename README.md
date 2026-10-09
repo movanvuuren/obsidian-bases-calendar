@@ -109,6 +109,7 @@ All options are configured through the **Properties** panel (gear icon) of a cal
 | Option | Key | Default | Description |
 |--------|-----|---------|-------------|
 | **Week starts on** | `weekStartDay` | Monday | The first day of each week column in month and week views. |
+| **Default view** | `defaultView` | Work week | The view the calendar opens on. Choose Month, Week, Work week, 3 day or Today. A view you pick from the toolbar still wins for the rest of the session. |
 | **Day starts at** | `scrollToTime` | 8:00 AM | The hour time views scroll to when first opened. You can still scroll up to see earlier hours. Available values: Midnight, 6 AM, 7 AM, 8 AM, 9 AM, 10 AM. |
 
 ---
@@ -167,7 +168,7 @@ Dragging is disabled when date properties come from computed or file-metadata so
 | 3 day | `threeDay` | Rolling 3-day time grid anchored on today. |
 | Today | `timeGridDay` | Single-day time grid. |
 
-The calendar remembers which view you last used within a session and returns to it after data updates.
+The calendar remembers which view you last used within a session and returns to it after data updates. When there is no remembered view, it opens on the **Default view** option.
 
 ---
 
