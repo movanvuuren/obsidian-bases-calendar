@@ -557,9 +557,9 @@ export const CalendarReactView: React.FC<CalendarReactViewProps> = ({
         threeDay: {
           type: "timeGrid",
           duration: { days: 3 },
-          buttonText: "3 day",
+          buttonText: "3 days",
         },
-        timeGridDay: { buttonText: "Today" },
+        timeGridDay: { buttonText: "Day" },
       }}
       firstDay={weekStartDay}
       headerToolbar={{
@@ -568,7 +568,7 @@ export const CalendarReactView: React.FC<CalendarReactViewProps> = ({
         right: "dayGridMonth,timeGridWeek,workWeek,threeDay,timeGridDay prev,today,next zoomOut,zoomIn",
       }}
       customButtons={customButtons}
-      buttonText={{ today: "Today" }}
+      buttonText={{ today: "Today", month: "Month", week: "Week", day: "Day" }}
       nowIndicator={true}
       scrollTime={scrollToTime}
       slotDuration={slotDuration}

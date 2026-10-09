@@ -465,8 +465,8 @@ export class CalendarView extends BasesView {
               dayGridMonth: "Month",
               timeGridWeek: "Week",
               workWeek: "Work week",
-              threeDay: "3 day",
-              timeGridDay: "Today",
+              threeDay: "3 days",
+              timeGridDay: "Day",
             },
           },
           {
