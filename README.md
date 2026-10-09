@@ -18,8 +18,8 @@ A calendar view for [Obsidian Bases](https://obsidian.md/bases) that displays yo
 
 ## Features
 
-- **Five view modes** — Month, Week (7-day), Work Week (Mon–Fri), 3-Day, and Today — switchable from the toolbar
-- **Default view** — choose which of the five views the calendar opens on (e.g. 3 day) instead of always Work Week
+- **Five view modes** — Month, Week (7-day), Work week (Mon–Fri), 3 days, and Day — switchable from the toolbar
+- **Default view** — choose which of the five views the calendar opens on (e.g. 3 days) instead of always Work week
 - **Configurable default scroll position** — open time views at any hour (e.g. 8 AM) instead of midnight
 - **Google Calendar colors** — assign named colors (Tomato, Sage, Peacock, etc.) to individual events via a frontmatter property
 - **Timed events** — notes with a date-and-time value render in the correct hourly slot; date-only notes stay all-day
@@ -134,7 +134,7 @@ Used when you create an entry by dragging or double-clicking on the calendar. Se
 | Option | Key | Default | Description |
 |--------|-----|---------|-------------|
 | **Entry style** | `entryStyle` | Tint | How entries are drawn: Tint, Glass, Gradient or Solid. See [Entry styles](#entry-styles). |
-| **Default view** | `defaultView` | Work week | The view the calendar opens on: Month, Week, Work week, 3 day or Today. |
+| **Default view** | `defaultView` | Work week | The view the calendar opens on: Month, Week, Work week, 3 days or Day. |
 | **Week starts on** | `weekStartDay` | Monday | The first day of each week column in month and week views. |
 | **Day starts at** | `scrollToTime` | 8:00 AM | The hour time views scroll to when first opened. You can still scroll up to see earlier hours. Available values: Midnight, 6 AM, 7 AM, 8 AM, 9 AM, 10 AM. |
 
@@ -221,7 +221,7 @@ For entries to appear on the calendar after they are created, they must satisfy 
 The plugin reads the time component of Obsidian date properties:
 
 - **Date only** (`2026-06-10`) — rendered as an all-day event across the full day row.
-- **Date + time** (`2026-06-10T14:00`) — rendered in the correct hourly slot in time-grid views (Week, Work Week, 3-Day, Today).
+- **Date + time** (`2026-06-10T14:00`) — rendered in the correct hourly slot in time-grid views (Week, Work week, 3 days, Day).
 
 If both `startDate` and `endDate` have times, the event block spans the correct duration. All-day multi-day events (date-only start + date-only end) span across the covered days in the all-day row.
 
@@ -242,11 +242,11 @@ Dragging is disabled when date properties come from computed or file-metadata so
 
 | Button label | View type | Description |
 |---|---|---|
-| month | `dayGridMonth` | Full monthly calendar grid. |
-| week | `timeGridWeek` | 7-day time grid, all days. |
+| Month | `dayGridMonth` | Full monthly calendar grid. |
+| Week | `timeGridWeek` | 7-day time grid, all days. |
 | Work week | `workWeek` | Mon–Fri time grid, weekends hidden. |
-| 3 day | `threeDay` | Rolling 3-day time grid anchored on today. |
-| Today | `timeGridDay` | Single-day time grid. |
+| 3 days | `threeDay` | Rolling 3-day time grid anchored on today. |
+| Day | `timeGridDay` | Single-day time grid. |
 
 The calendar opens on the **Default view** option. A view you pick from the toolbar is kept for as long as that calendar stays open, including across data updates, and is not carried over to the next time the base is opened.
 
