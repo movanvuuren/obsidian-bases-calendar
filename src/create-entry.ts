@@ -13,6 +13,7 @@ export interface NewEntryOptions {
   endProp: string | null;
   personProp: string;
   iconProp: string;
+  involvementProp: string;
   onDone?: () => void;
 }
 
@@ -20,12 +21,14 @@ interface EntryDetails {
   title: string;
   person: string;
   icon: string;
+  involvement: "attending" | "following";
 }
 
 class NewEntryModal extends Modal {
   private title = "";
   private person = "";
   private icon = "";
+  private involvement: "attending" | "following" = "attending";
 
   constructor(
     app: App,
@@ -48,7 +51,12 @@ class NewEntryModal extends Modal {
       const title = this.title.trim();
       if (!title) return;
       this.close();
-      this.onSubmit({ title, person: this.person.trim(), icon: this.icon.trim() });
+      this.onSubmit({
+        title,
+        person: this.person.trim(),
+        icon: this.icon.trim(),
+        involvement: this.involvement,
+      });
     };
 
     new Setting(contentEl).setName("Name").addText((text) => {
@@ -87,6 +95,17 @@ class NewEntryModal extends Modal {
           }
         });
       });
+
+    new Setting(contentEl)
+      .setName("Involvement")
+      .setDesc("Following entries are shown with a lighter fill.")
+      .addDropdown((dd) =>
+        dd
+          .addOption("attending", "Attending")
+          .addOption("following", "Following")
+          .setValue(this.involvement)
+          .onChange((v) => (this.involvement = v as "attending" | "following")),
+      );
 
     new Setting(contentEl).addButton((btn) =>
       btn.setButtonText("Create").setCta().onClick(submit),
@@ -146,6 +165,7 @@ async function createEntry(
       fm[options.personProp] = people.length > 1 ? people : people[0];
     }
     if (details.icon) fm[options.iconProp] = details.icon;
+    fm[options.involvementProp] = details.involvement;
   });
   await app.workspace.getLeaf(false).openFile(file);
 }

@@ -32,6 +32,7 @@ interface CalendarReactViewProps {
   scrollToTime: string;
   detailProperty: BasesPropertyId | null;
   iconProperty: BasesPropertyId | null;
+  involvementProperty: BasesPropertyId | null;
   properties: BasesPropertyId[];
   onViewChange: (view: string) => void;
   onZoomChange: (slotDuration: string) => void;
@@ -56,6 +57,7 @@ export const CalendarReactView: React.FC<CalendarReactViewProps> = ({
   scrollToTime,
   detailProperty,
   iconProperty,
+  involvementProperty,
   properties,
   onViewChange,
   onZoomChange,
@@ -131,8 +133,15 @@ export const CalendarReactView: React.FC<CalendarReactViewProps> = ({
       }
     }
 
+    let following = false;
+    if (involvementProperty) {
+      const involvement = tryGetValue(calEntry.entry, involvementProperty);
+      following = involvement?.toString().trim().toLowerCase() === "following";
+    }
+
     return {
       id: calEntry.entry.file.path,
+      classNames: following ? ["is-following"] : [],
       title: calEntry.entry.file.basename,
       start: calEntry.startDate,
       end: adjustedEndDate,
@@ -143,6 +152,7 @@ export const CalendarReactView: React.FC<CalendarReactViewProps> = ({
         entry: calEntry.entry,
         originalEndDate: calEntry.endDate,
         allDay: calEntry.allDay,
+        following,
       },
     };
   });
@@ -372,6 +382,13 @@ export const CalendarReactView: React.FC<CalendarReactViewProps> = ({
     return <span className="bases-calendar-event-icon" ref={nodeRef} />;
   };
 
+  const FollowIcon: React.FC = () => {
+    const nodeRef = useCallback((node: HTMLElement | null) => {
+      if (node) setIcon(node, "eye");
+    }, []);
+    return <span className="bases-calendar-follow-icon" ref={nodeRef} title="Following" />;
+  };
+
   const renderEventContent = useCallback(
     (eventInfo: EventContentArg) => {
       if (!app) return null;
@@ -444,6 +461,7 @@ export const CalendarReactView: React.FC<CalendarReactViewProps> = ({
             </span>
           )}
           <div className="bases-calendar-event-title">
+            {eventInfo.event.extendedProps.following && <FollowIcon />}
             {titleProp
               ? <ListPropertyValue value={titleProp.value} maxItems={1} />
               : entry.file.basename}

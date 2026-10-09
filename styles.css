@@ -513,3 +513,31 @@ body {
 .bases-calendar-container .fc-daygrid-event {
   position: relative;
 }
+
+/* Following: entries you only need to know about get a lighter fill, a dashed
+   border and a small eye beside the title. Works with every entry style. */
+.bases-calendar-container .fc-event.fc-event.is-following {
+  background-color: color-mix(in srgb, var(--ev-color, var(--background-secondary)) 12%, transparent) !important;
+  background-image: none !important;
+  border: 1px dashed color-mix(in srgb, var(--ev-color, var(--background-modifier-border)) 70%, transparent) !important;
+  box-shadow: none !important;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.bases-calendar-container .fc-event.is-following .bases-calendar-event-content {
+  color: var(--text-normal);
+  text-shadow: none;
+}
+
+.bases-calendar-follow-icon {
+  display: inline-flex;
+  vertical-align: -2px;
+  margin-right: 4px;
+  opacity: 0.8;
+}
+
+.bases-calendar-follow-icon .svg-icon {
+  width: 12px;
+  height: 12px;
+}

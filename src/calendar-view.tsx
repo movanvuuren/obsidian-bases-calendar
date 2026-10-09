@@ -39,6 +39,7 @@ export class CalendarView extends BasesView {
   private colorProp: BasesPropertyId | null = null;
   private detailProp: BasesPropertyId | null = null;
   private iconProp: BasesPropertyId | null = null;
+  private involvementProp: BasesPropertyId | null = null;
   private weekStartDay: number = 1;
   private scrollToTime: string = "08:00:00";
   private currentView: string = "workWeek";
@@ -96,6 +97,9 @@ export class CalendarView extends BasesView {
     this.endDateProp = this.config.getAsPropertyId("endDate");
     this.colorProp = this.config.getAsPropertyId("colorProperty");
     this.detailProp = this.config.getAsPropertyId("detailProperty");
+    this.involvementProp =
+      this.config.getAsPropertyId("involvementProperty") ??
+      ("note.involvement" as BasesPropertyId);
     this.iconProp =
       this.config.getAsPropertyId("iconProperty") ?? ("note.icon" as BasesPropertyId);
 
@@ -188,6 +192,7 @@ export class CalendarView extends BasesView {
             scrollToTime={this.scrollToTime}
             detailProperty={this.detailProp}
             iconProperty={this.iconProp}
+            involvementProperty={this.involvementProp}
             properties={this.config.getOrder() || []}
             onViewChange={(view) => { this.currentView = view; this.viewChosenByUser = true; }}
             onZoomChange={(dur) => { this.slotDuration = dur; }}
@@ -227,6 +232,9 @@ export class CalendarView extends BasesView {
         ? this.detailProp.slice(5)
         : "person";
     const iconProp = this.iconProp?.startsWith("note.") ? this.iconProp.slice(5) : "icon";
+    const involvementProp = this.involvementProp?.startsWith("note.")
+      ? this.involvementProp.slice(5)
+      : "involvement";
     promptNewEntry(
       this.app,
       { start, end, allDay },
@@ -237,6 +245,7 @@ export class CalendarView extends BasesView {
         endProp,
         personProp,
         iconProp,
+        involvementProp,
         onDone: () => this.calendarHandleRef.current?.unselect(),
       },
     );
@@ -359,6 +368,12 @@ export class CalendarView extends BasesView {
             type: "property",
             key: "iconProperty",
             placeholder: "Emoji or Lucide icon name (default: icon)",
+          },
+          {
+            displayName: "Involvement property",
+            type: "property",
+            key: "involvementProperty",
+            placeholder: "attending or following (default: involvement)",
           },
           {
             displayName: "Color property",
