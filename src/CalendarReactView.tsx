@@ -8,7 +8,7 @@ import type {
   ViewMountArg,
 } from "@fullcalendar/core";
 import dayGridPlugin from "@fullcalendar/daygrid";
-import interactionPlugin from "@fullcalendar/interaction";
+import interactionPlugin, { EventResizeDoneArg } from "@fullcalendar/interaction";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import { BasesEntry, BasesPropertyId, DateValue, getIconIds, setIcon, Value } from "obsidian";
@@ -49,6 +49,7 @@ interface CalendarReactViewProps {
     allDay?: boolean,
   ) => Promise<void>;
   editable: boolean;
+  durationEditable: boolean;
   onCreateEntry?: (start: Date, end: Date, allDay: boolean) => void;
   calendarHandleRef?: React.RefObject<CalendarHandle | null>;
 }
@@ -70,6 +71,7 @@ export const CalendarReactView: React.FC<CalendarReactViewProps> = ({
   onEntryContextMenu,
   onEventDrop,
   editable,
+  durationEditable,
   onCreateEntry,
   calendarHandleRef,
 }) => {
@@ -238,7 +240,7 @@ export const CalendarReactView: React.FC<CalendarReactViewProps> = ({
   );
 
   const handleEventDrop = useCallback(
-    async (dropInfo: EventDropArg) => {
+    async (dropInfo: EventDropArg | EventResizeDoneArg) => {
       if (!onEventDrop) {
         dropInfo.revert();
         return;
@@ -246,7 +248,7 @@ export const CalendarReactView: React.FC<CalendarReactViewProps> = ({
 
       const entry = dropInfo.event.extendedProps.entry as BasesEntry;
       const originalEndDate = dropInfo.event.extendedProps.originalEndDate as Date | undefined;
-      const allDay = dropInfo.event.extendedProps.allDay as boolean;
+      const allDay = dropInfo.event.allDay;
       const newStart = dropInfo.event.start;
       const newEnd = dropInfo.event.end;
 
@@ -256,7 +258,7 @@ export const CalendarReactView: React.FC<CalendarReactViewProps> = ({
       }
 
       let actualEndDate: Date | undefined;
-      if (originalEndDate) {
+      if (originalEndDate || "startDelta" in dropInfo || dropInfo.oldEvent.allDay !== allDay) {
         if (allDay && newEnd) {
           actualEndDate = new Date(newEnd);
           actualEndDate.setDate(actualEndDate.getDate() - 1);
@@ -614,13 +616,15 @@ export const CalendarReactView: React.FC<CalendarReactViewProps> = ({
       eventClick={handleEventClick}
       eventMouseEnter={handleEventMouseEnter}
       eventDrop={(info) => void handleEventDrop(info)}
+      eventResize={(info) => void handleEventDrop(info)}
       select={handleSelect}
       eventDidMount={handleEventDidMount}
       viewDidMount={handleViewDidMount}
       height="100%"
       fixedWeekCount={false}
       fixedMirrorParent={document.body ?? undefined}
-      eventDurationEditable={false}
+      eventDurationEditable={durationEditable}
+      eventResizableFromStart={durationEditable}
       selectable={Boolean(onCreateEntry)}
       selectMirror={false}
       unselectAuto={false}

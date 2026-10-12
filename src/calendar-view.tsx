@@ -5,6 +5,7 @@ import {
   BasesView,
   DateValue,
   Menu,
+  Notice,
   parsePropertyId,
   QueryController,
 } from "obsidian";
@@ -218,6 +219,7 @@ export class CalendarView extends BasesView {
               this.updateEntryDates(entry, newStart, newEnd, allDay)
             }
             editable={this.isEditable()}
+            durationEditable={this.isEditable() && Boolean(this.endDateProp)}
             onCreateEntry={
               this.isEditable()
                 ? (start, end, allDay) => this.createEntry(start, end, allDay)
@@ -332,16 +334,58 @@ export class CalendarView extends BasesView {
       return;
     }
 
-    await this.app.fileManager.processFrontMatter(file, (frontmatter) => {
-      frontmatter[extractedStartProp] = allDay
-        ? formatDate(newStart)
-        : formatDateTime(newStart);
+    const changes: Record<string, string> = {
+      [extractedStartProp]: allDay ? formatDate(newStart) : formatDateTime(newStart),
+    };
+    if (newEnd && extractedEndProp) {
+      changes[extractedEndProp] = allDay ? formatDate(newEnd) : formatDateTime(newEnd);
+    }
+    const previous: Record<string, { present: boolean; value: unknown }> = {};
+    try {
+      await this.app.fileManager.processFrontMatter(file, (frontmatter) => {
+        for (const [key, value] of Object.entries(changes)) {
+          previous[key] = {
+            present: Object.prototype.hasOwnProperty.call(frontmatter, key),
+            value: frontmatter[key],
+          };
+          frontmatter[key] = value;
+        }
+      });
+    } catch (error) {
+      new Notice("Could not save calendar dates. The change was reverted.");
+      throw error;
+    }
 
-      if (this.endDateProp && newEnd && extractedEndProp) {
-        frontmatter[extractedEndProp] = allDay
-          ? formatDate(newEnd)
-          : formatDateTime(newEnd);
-      }
+    const message = document.createDocumentFragment();
+    message.append(`Updated ${file.basename}. `);
+    const undo = document.createElement("button");
+    undo.textContent = "Undo";
+    message.appendChild(undo);
+    const notice = new Notice(message, 10000);
+    undo.addEventListener("click", () => {
+      if (undo.disabled) return;
+      undo.disabled = true;
+      void (async () => {
+        try {
+          await this.app.fileManager.processFrontMatter(file, (frontmatter) => {
+            // Do not overwrite another calendar move or a manual date edit.
+            for (const [key, value] of Object.entries(changes)) {
+              if (frontmatter[key] !== value) {
+                throw new Error("Dates have changed since this action.");
+              }
+            }
+            for (const [key, snapshot] of Object.entries(previous)) {
+              if (snapshot.present) frontmatter[key] = snapshot.value;
+              else delete frontmatter[key];
+            }
+          });
+          notice.hide();
+          new Notice("Calendar change undone.");
+        } catch {
+          notice.hide();
+          new Notice("Could not undo. The note may have changed or could not be saved.");
+        }
+      })();
     });
   }
 

@@ -24,7 +24,7 @@ A calendar view for [Obsidian Bases](https://obsidian.md/bases) that displays yo
 - **Google Calendar colors** — assign named colors (Tomato, Sage, Peacock, etc.) to individual events via a frontmatter property
 - **Timed events** — notes with a date-and-time value render in the correct hourly slot; date-only notes stay all-day
 - **Detail property** — choose a secondary property (e.g. attendees, location) to display on the second line of each event
-- **Drag-to-reschedule** — drag events to update their date/time frontmatter properties directly
+- **Drag-to-reschedule and resize** — move events or drag either edge to update dates and duration, with an Undo action afterwards
 - **Create entries from the calendar** — drag across time slots, or double-click a slot, to create a new note with its start and end filled in
 - **People tags** — each person in the detail property is shown as its own small tag
 - **Icon bookmark** — an emoji or [Lucide](https://lucide.dev/icons/) icon shown as a small bookmark in the top-right of an entry
@@ -227,14 +227,18 @@ If both `startDate` and `endDate` have times, the event block spans the correct 
 
 ---
 
-## Drag-to-reschedule
+## Drag-to-reschedule and resize
 
 When `startDate` (and optionally `endDate`) are note properties (frontmatter), events are draggable. Dropping an event on a new date or time slot writes the updated value back to the note's frontmatter automatically.
 
 - All-day events write back as `YYYY-MM-DD`.
 - Timed events write back as `YYYY-MM-DDTHH:mm`.
 
-Dragging is disabled when date properties come from computed or file-metadata sources (e.g. `file.ctime`).
+Drag the start or end edge of an event to change its duration when an editable end-date property is configured. All-day entries can be extended across days in the month view.
+
+After moving or resizing, a notification offers **Undo** for 10 seconds. Undo restores the original date properties, including an absent end date, and leaves unrelated note changes intact. If the dates have since changed, Undo declines to overwrite them.
+
+Dragging and resizing are disabled when date properties come from computed or file-metadata sources (e.g. `file.ctime`).
 
 ---
 
