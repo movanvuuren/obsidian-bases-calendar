@@ -685,3 +685,9 @@ body {
   min-width: 520px;
   right: auto;
 }
+
+/* Keep preset and custom colour controls together in the entry dialog. */
+.bases-calendar-custom-colour-setting {
+  border-top: none;
+  padding-top: 0;
+}

@@ -206,7 +206,7 @@ A dialog opens showing the date and time range and asks for:
 | **Who** *(optional)* | The detail property, or `person` if the detail property is not a note property. Several people can be separated by commas. |
 | **Icon** *(optional)* | The icon property, or `icon`. |
 | **Involvement** | The involvement property, or `involvement`. Attending or Following. |
-| **Colour** | The color property, or `color`. A row of Google Calendar colour swatches; click one to choose it, and click it again to clear. The picker starts on the template's colour, if it has one. |
+| **Colour** | The color property, or `color`. Google Calendar swatches plus a custom colour picker that saves a hex value such as `#b11b1b`. Click a swatch again or use **Clear** to use the theme default. The picker starts on the template's named or hex colour, if it has one. |
 
 The note is created in the configured **Folder**, with the content of the **Template note** if one is set, then has its start and end properties written (a date for all-day entries, a date and time otherwise) and is opened. The range stays highlighted while the dialog is open and clears when it closes.
 

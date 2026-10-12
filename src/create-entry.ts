@@ -1,4 +1,4 @@
-﻿import { App, Modal, Setting, TFile, normalizePath } from "obsidian";
+import { App, Modal, Setting, TFile, normalizePath } from "obsidian";
 import { GOOGLE_CALENDAR_COLORS } from "./colors";
 
 export interface NewEntryRequest {
@@ -121,7 +121,7 @@ class NewEntryModal extends Modal {
     const buttons = new Map<string, HTMLButtonElement>();
     const select = (name: string) => {
       this.color = this.color === name ? "" : name;
-      buttons.forEach((btn, key) => btn.toggleClass("is-selected", key === this.color));
+      updateSelection();
     };
     for (const [name, hex] of Object.entries(GOOGLE_CALENDAR_COLORS)) {
       const btn = swatches.createEl("button", {
@@ -134,6 +134,38 @@ class NewEntryModal extends Modal {
       buttons.set(name, btn);
     }
 
+    const customSetting = new Setting(contentEl)
+      .setName("Custom colour")
+      .setDesc("Pick any colour, or clear it to use the theme default.");
+    customSetting.settingEl.addClass("bases-calendar-custom-colour-setting");
+    const picker = customSetting.controlEl.createEl("input", {
+      attr: { type: "color", "aria-label": "Custom event colour" },
+    });
+    picker.value = /^#[0-9a-f]{6}$/i.test(this.color)
+      ? this.color
+      : GOOGLE_CALENDAR_COLORS[this.color] || "#b11b1b";
+    const selectedColour = customSetting.controlEl.createEl("span", {
+      cls: "bases-calendar-custom-colour-value",
+    });
+    const updateSelection = () => {
+      buttons.forEach((btn, key) => {
+        btn.toggleClass("is-selected", key === this.color);
+        btn.setAttribute("aria-pressed", String(key === this.color));
+      });
+      const custom = /^#[0-9a-f]{6}$/i.test(this.color);
+      if (custom) picker.value = this.color;
+      else if (GOOGLE_CALENDAR_COLORS[this.color]) picker.value = GOOGLE_CALENDAR_COLORS[this.color];
+      selectedColour.textContent = custom ? this.color : this.color || "Theme default";
+    };
+    picker.addEventListener("input", () => {
+      this.color = picker.value;
+      updateSelection();
+    });
+    customSetting.addButton((btn) => btn.setButtonText("Clear").onClick(() => {
+      this.color = "";
+      updateSelection();
+    }));
+    updateSelection();
     new Setting(contentEl).addButton((btn) =>
       btn.setButtonText("Create").setCta().onClick(submit),
     );
@@ -168,7 +200,7 @@ function templateColor(app: App, options: NewEntryOptions): string {
   if (!(template instanceof TFile)) return "";
   const value = app.metadataCache.getFileCache(template)?.frontmatter?.[options.colorProp];
   const name = typeof value === "string" ? value.trim().toLowerCase() : "";
-  return name in GOOGLE_CALENDAR_COLORS ? name : "";
+  return name in GOOGLE_CALENDAR_COLORS || /^#[0-9a-f]{6}$/i.test(name) ? name : "";
 }
 
 async function createEntry(
@@ -211,6 +243,7 @@ async function createEntry(
     fm[options.involvementProp] = details.involvement;
     fm[options.titleProp] = title;
     if (details.color) fm[options.colorProp] = details.color;
+    else delete fm[options.colorProp];
     if (options.flagProp) fm[options.flagProp] = true;
   });
   await app.workspace.getLeaf(false).openFile(file);
